@@ -110,7 +110,7 @@ const play = useCallback(async (track) => {
     audio.load();          // ← add this for mobile Safari
     audio.currentTime = 0;
   } else if (!audio.src || audio.src === window.location.href) {
-    // ← guard against empty src resolving to page URL
+    // guard against empty src resolving to page URL
     audio.src = currentTrack.url;
     audio.load();
   }
