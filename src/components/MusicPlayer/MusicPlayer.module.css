@@ -1,0 +1,217 @@
+.playerWrapper {
+  position: relative;
+}
+
+/* Track menu */
+.trackMenu {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: var(--paper);
+  border: var(--border-dark);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 14px;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.trackMenuLabel {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-4);
+}
+
+.trackGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+}
+
+.trackBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  background: var(--parchment);
+  transition: all var(--transition);
+  text-align: left;
+}
+
+.trackBtn:hover {
+  border-color: color-mix(in srgb, var(--tc) 30%, transparent);
+  background: color-mix(in srgb, var(--tc) 8%, var(--paper));
+}
+
+.trackBtnActive {
+  border-color: var(--tc) !important;
+  background: color-mix(in srgb, var(--tc) 12%, var(--paper)) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--tc) 10%, transparent);
+}
+
+.trackEmoji { font-size: 1rem; }
+
+.trackLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--ink-2);
+  line-height: 1.2;
+}
+
+.trackMood {
+  font-size: 0.62rem;
+  color: var(--ink-4);
+  text-transform: capitalize;
+  font-style: italic;
+}
+
+/* Volume */
+.volumeRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 6px;
+  border-top: var(--border);
+}
+
+.volumeIcon { font-size: 0.85rem; }
+
+.volumeSlider {
+  flex: 1;
+  appearance: none;
+  height: 3px;
+  border-radius: 99px;
+  background: var(--cream-dark);
+  outline: none;
+  cursor: pointer;
+}
+
+.volumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--terracotta);
+  cursor: pointer;
+  box-shadow: var(--shadow-xs);
+  transition: transform var(--transition);
+}
+
+.volumeSlider::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+}
+
+.volumeValue {
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  color: var(--ink-4);
+  min-width: 28px;
+  text-align: right;
+}
+
+/* Mini player */
+.miniPlayer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+/* Visualizer */
+.visualizer {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 22px;
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+.vizBar {
+  width: 2.5px;
+  height: 100%;
+  border-radius: 2px;
+  transform-origin: bottom;
+  background: var(--cream-dark);
+}
+
+/* Track name */
+.trackName {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  min-width: 0;
+  text-align: left;
+}
+
+.trackNameEmoji { font-size: 0.85rem; flex-shrink: 0; }
+
+.trackNameLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.chevron {
+  font-size: 0.55rem;
+  color: var(--ink-4);
+  flex-shrink: 0;
+}
+
+/* Play button */
+.playBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--cream);
+  border: var(--border-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  transition: all var(--transition);
+  flex-shrink: 0;
+  color: var(--ink-3);
+}
+
+.playBtn:hover {
+  background: var(--tc, var(--terracotta));
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 0 12px color-mix(in srgb, var(--tc, var(--terracotta)) 35%, transparent);
+}
+
+.playBtnActive {
+  background: var(--tc, var(--terracotta)) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+  box-shadow: 0 0 14px color-mix(in srgb, var(--tc, var(--terracotta)) 40%, transparent) !important;
+}
+
+.loadingDot {
+  width: 8px;
+  height: 8px;
+  border: 1.5px solid rgba(255,255,255,0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: block;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }

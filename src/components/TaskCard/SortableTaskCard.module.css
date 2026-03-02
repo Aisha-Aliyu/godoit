@@ -1,0 +1,28 @@
+.wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  position: relative;
+}
+
+.dragHandle {
+  opacity: 0;
+  color: var(--ink-4);
+  font-size: 0.9rem;
+  padding: 14px 2px;
+  cursor: grab;
+  transition: opacity var(--transition), color var(--transition);
+  flex-shrink: 0;
+  line-height: 1;
+  letter-spacing: -1px;
+  touch-action: none;
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+}
+
+.wrapper:hover .dragHandle { opacity: 1; }
+.dragHandle:active { cursor: grabbing; color: var(--terracotta); }
+
+.cardWrapper { flex: 1; min-width: 0; }
