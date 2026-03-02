@@ -27,23 +27,20 @@ export default function Sidebar({
   onProjectsChange,
   onSignOut,
   taskCounts,
-  // Day 3
   pomodoroProps,
   musicProps,
-  // Day 4
   onThemeToggle,
   isDark,
   onStatsOpen,
-  // Mobile
   isOpen,
   onClose,
 }) {
-  const [addingProject,  setAddingProject]  = useState(false);
-  const [newName,        setNewName]        = useState("");
-  const [newColor,       setNewColor]       = useState(PROJECT_COLORS[0]);
-  const [newIcon,        setNewIcon]        = useState(PROJECT_ICONS[0]);
-  const [saving,         setSaving]         = useState(false);
-  const [notifStatus,    setNotifStatus]    = useState(
+  const [addingProject, setAddingProject] = useState(false);
+  const [newName,       setNewName]       = useState("");
+  const [newColor,      setNewColor]      = useState(PROJECT_COLORS[0]);
+  const [newIcon,       setNewIcon]       = useState(PROJECT_ICONS[0]);
+  const [saving,        setSaving]        = useState(false);
+  const [notifStatus,   setNotifStatus]   = useState(
     typeof Notification !== "undefined" ? Notification.permission : "unsupported"
   );
 
@@ -79,17 +76,24 @@ export default function Sidebar({
 
   return (
     <>
-      {/* Mobile backdrop */}
-      {isOpen && (
-        <div
-          className={styles.sidebarBackdrop}
-          onClick={onClose}
-        />
-      )}
+      {/* Mobile backdrop — Framer Motion fade, only visible on mobile */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            className={styles.backdrop}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.22 }}
+            onClick={onClose}
+          />
+        )}
+      </AnimatePresence>
 
+      {/* Sidebar panel */}
       <aside className={clsx(styles.sidebar, { [styles.sidebarOpen]: isOpen })}>
 
-        {/* ── Brand ─────────────────────────────────────────────── */}
+        {/* Brand */}
         <div className={styles.brand}>
           <div className={styles.logoMark}>✓</div>
           <span className={styles.logoText}>GoDoIt</span>
@@ -102,10 +106,10 @@ export default function Sidebar({
           </button>
         </div>
 
-        {/* ── Pomodoro Timer ────────────────────────────────────── */}
+        {/* Pomodoro Timer */}
         {pomodoroProps && <Pomodoro {...pomodoroProps} />}
 
-        {/* ── Smart Views ───────────────────────────────────────── */}
+        {/* Smart Views */}
         <nav className={styles.section}>
           <p className={styles.sectionLabel}>Overview</p>
           {SMART_VIEWS.map((view) => (
@@ -129,7 +133,7 @@ export default function Sidebar({
           ))}
         </nav>
 
-        {/* ── Projects ──────────────────────────────────────────── */}
+        {/* Projects */}
         <nav className={clsx(styles.section, styles.projectsSection)}>
           <div className={styles.sectionHeader}>
             <p className={styles.sectionLabel}>Projects</p>
@@ -142,7 +146,6 @@ export default function Sidebar({
             </button>
           </div>
 
-          {/* New project form */}
           <AnimatePresence>
             {addingProject && (
               <motion.form
@@ -162,9 +165,7 @@ export default function Sidebar({
                   autoFocus
                   maxLength={100}
                 />
-
                 <div className={styles.projectOptions}>
-                  {/* Icon picker */}
                   <div className={styles.iconPicker}>
                     {PROJECT_ICONS.slice(0, 6).map((icon) => (
                       <button
@@ -179,8 +180,6 @@ export default function Sidebar({
                       </button>
                     ))}
                   </div>
-
-                  {/* Color picker */}
                   <div className={styles.colorPicker}>
                     {PROJECT_COLORS.map((color) => (
                       <button
@@ -195,7 +194,6 @@ export default function Sidebar({
                     ))}
                   </div>
                 </div>
-
                 <button
                   type="submit"
                   className={styles.createProjectBtn}
@@ -207,7 +205,6 @@ export default function Sidebar({
             )}
           </AnimatePresence>
 
-          {/* Project list */}
           {projects.map((project) => (
             <div key={project.id} className={styles.projectItem}>
               <button
@@ -221,10 +218,7 @@ export default function Sidebar({
                 }}
               >
                 <span className={styles.navIcon}>{project.icon}</span>
-                <span
-                  className={styles.projectDot}
-                  style={{ background: project.color }}
-                />
+                <span className={styles.projectDot} style={{ background: project.color }} />
                 <span className={styles.navLabel}>{project.name}</span>
                 {taskCounts?.[project.id] > 0 && (
                   <span className={styles.navCount}>{taskCounts[project.id]}</span>
@@ -241,27 +235,24 @@ export default function Sidebar({
           ))}
         </nav>
 
-        {/* ── Ambient Music Player ──────────────────────────────── */}
+        {/* Ambient Music Player */}
         {musicProps && (
           <div className={styles.musicSection}>
             <MusicPlayer {...musicProps} />
           </div>
         )}
 
-        {/* ── Footer ────────────────────────────────────────────── */}
+        {/* Footer */}
         <div className={styles.footer}>
           <div className={styles.userRow}>
             <div className={styles.avatar}>{initials}</div>
             <div className={styles.userInfo}>
-              <span className={styles.userName}>
-                {user?.email?.split("@")[0]}
-              </span>
+              <span className={styles.userName}>{user?.email?.split("@")[0]}</span>
               <span className={styles.userEmail}>{user?.email}</span>
             </div>
           </div>
 
           <div className={styles.footerActions}>
-            {/* Notifications */}
             {notifStatus === "default" && (
               <button
                 className={styles.notifBtn}
@@ -274,17 +265,9 @@ export default function Sidebar({
             {notifStatus === "granted" && (
               <span className={styles.notifOn} title="Reminders enabled">🔔</span>
             )}
-
-            {/* Stats */}
-            <button
-              className={styles.statsBtn}
-              onClick={onStatsOpen}
-              title="View progress"
-            >
+            <button className={styles.statsBtn} onClick={onStatsOpen} title="View progress">
               📊
             </button>
-
-            {/* Theme toggle */}
             <button
               className={styles.themeToggle}
               onClick={onThemeToggle}
@@ -292,13 +275,7 @@ export default function Sidebar({
             >
               {isDark ? "☀" : "🌙"}
             </button>
-
-            {/* Sign out */}
-            <button
-              className={styles.signOutBtn}
-              onClick={onSignOut}
-              title="Sign out"
-            >
+            <button className={styles.signOutBtn} onClick={onSignOut} title="Sign out">
               ⏻
             </button>
           </div>

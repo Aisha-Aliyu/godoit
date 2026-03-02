@@ -1,5 +1,7 @@
+/* ── Base sidebar ────────────────────────────────────────────────────── */
 .sidebar {
   width: var(--sidebar-w);
+  min-width: var(--sidebar-w);
   background: var(--parchment);
   border-right: var(--border-dark);
   display: flex;
@@ -10,15 +12,30 @@
   overflow-y: auto;
   overflow-x: hidden;
   flex-shrink: 0;
+  z-index: 200;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Brand */
+/* ── Mobile backdrop ─────────────────────────────────────────────────── */
+.backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 21, 16, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 199;
+  cursor: pointer;
+}
+
+/* ── Brand ───────────────────────────────────────────────────────────── */
 .brand {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 20px 18px 16px;
   border-bottom: var(--border);
+  flex-shrink: 0;
 }
 
 .logoMark {
@@ -42,15 +59,43 @@
   font-weight: 600;
   color: var(--ink);
   letter-spacing: -0.02em;
+  flex: 1;
 }
 
-/* Sections */
+.mobileSidebarClose {
+  display: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--cream);
+  border: var(--border-dark);
+  color: var(--ink-3);
+  font-size: 0.65rem;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.mobileSidebarClose:hover {
+  background: var(--cream-dark);
+  color: var(--ink);
+}
+
+/* ── Sections ────────────────────────────────────────────────────────── */
 .section {
   padding: 12px 10px 8px;
   border-bottom: var(--border);
   display: flex;
   flex-direction: column;
   gap: 2px;
+  flex-shrink: 0;
+}
+
+.projectsSection {
+  flex: 1;
+  overflow-y: auto;
 }
 
 .sectionHeader {
@@ -71,23 +116,7 @@
   margin-bottom: 2px;
 }
 
-.addProjectBtn {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--cream);
-  border: var(--border);
-  color: var(--ink-3);
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--transition);
-  line-height: 1;
-}
-.addProjectBtn:hover { background: var(--cream-dark); color: var(--ink); }
-
-/* Nav items */
+/* ── Nav items ───────────────────────────────────────────────────────── */
 .navItem {
   display: flex;
   align-items: center;
@@ -100,7 +129,9 @@
   width: 100%;
   text-align: left;
   transition: all var(--transition);
-  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
 .navItem:hover {
@@ -136,14 +167,33 @@
   font-family: var(--font-mono);
   padding: 1px 6px;
   border-radius: 99px;
+  flex-shrink: 0;
 }
 
 .navItemActive .navCount {
-  background: rgba(196,98,45,0.15);
+  background: rgba(196, 98, 45, 0.15);
   color: var(--terracotta);
 }
 
-/* Project items */
+/* ── Add project button ──────────────────────────────────────────────── */
+.addProjectBtn {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--cream);
+  border: var(--border);
+  color: var(--ink-3);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+  line-height: 1;
+  cursor: pointer;
+}
+.addProjectBtn:hover { background: var(--cream-dark); color: var(--ink); }
+
+/* ── Project items ───────────────────────────────────────────────────── */
 .projectItem {
   display: flex;
   align-items: center;
@@ -172,6 +222,9 @@
   opacity: 0;
   transition: all var(--transition);
   flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
 .projectItem:hover .deleteProjectBtn { opacity: 1; }
@@ -180,7 +233,7 @@
   color: var(--terracotta);
 }
 
-/* Add project form */
+/* ── Add project form ────────────────────────────────────────────────── */
 .addProjectForm {
   display: flex;
   flex-direction: column;
@@ -202,6 +255,7 @@
   font-family: var(--font-body);
   padding: 7px 10px;
   width: 100%;
+  outline: none;
 }
 
 .projectInput:focus {
@@ -224,6 +278,7 @@
   background: var(--parchment);
   border: var(--border);
   transition: all var(--transition);
+  cursor: pointer;
 }
 
 .iconOption:hover { border-color: var(--cream-dark); background: var(--cream); }
@@ -237,6 +292,7 @@
   border-radius: 50%;
   border: 2px solid transparent;
   transition: transform var(--transition);
+  cursor: pointer;
 }
 
 .colorDot:hover { transform: scale(1.15); }
@@ -251,17 +307,28 @@
   padding: 7px;
   width: 100%;
   transition: background var(--transition);
+  border: none;
+  cursor: pointer;
 }
 .createProjectBtn:hover:not(:disabled) { background: var(--terracotta-dark); }
 .createProjectBtn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-/* Footer */
+/* ── Music section ───────────────────────────────────────────────────── */
+.musicSection {
+  padding: 0 14px;
+  border-bottom: var(--border);
+  flex-shrink: 0;
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────── */
 .footer {
-  padding: 12px 14px;
+  padding: 10px 14px;
   border-top: var(--border);
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
   margin-top: auto;
 }
 
@@ -310,19 +377,33 @@
   white-space: nowrap;
 }
 
-.signOutBtn {
+.footerActions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ── Footer icon buttons ─────────────────────────────────────────────── */
+.signOutBtn,
+.themeToggle,
+.statsBtn,
+.notifBtn {
   width: 28px;
   height: 28px;
   border-radius: 50%;
   border: var(--border);
-  background: var(--cream);
-  color: var(--ink-3);
-  font-size: 0.8rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 0.82rem;
   transition: all var(--transition);
   flex-shrink: 0;
+  cursor: pointer;
+}
+
+.signOutBtn {
+  background: var(--cream);
+  color: var(--ink-3);
 }
 .signOutBtn:hover {
   background: var(--terracotta-light);
@@ -330,136 +411,9 @@
   border-color: var(--terracotta-light);
 }
 
-/* ── Mobile Sidebar ─────────────────────────────────────────────────── */
-.sidebarDrawer {
-  /* On mobile, sidebar is an overlay drawer */
-  position: fixed !important;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  z-index: 200;
-  transform: translateX(-100%);
-  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
-  box-shadow: var(--shadow-lg);
-}
-
-.sidebarDrawerOpen {
-  transform: translateX(0) !important;
-}
-
-.sidebarBackdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(26,21,16,0.4);
-  backdrop-filter: blur(4px);
-  z-index: 199;
-  display: none;
-}
-
-.sidebarBackdropVisible {
-  display: block;
-}
-
-.musicSection {
-  padding: 0 14px;
-  border-bottom: var(--border);
-}
-
-.mobileSidebarClose {
-  display: none;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--cream);
-  border: var(--border);
-  color: var(--ink-3);
-  font-size: 0.65rem;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--transition);
-}
-
-@media (max-width: 768px) {
-  .mobileSidebarClose {
-    display: flex;
-  }
-  
-  .sidebar {
-    width: 290px !important;
-    max-height: 100dvh;
-    overflow-y: auto;
-  }
-  
-  .sidebarBackdrop {
-    display: none;
-  }
-}
-
-@media (max-width: 768px) {
-  .sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    z-index: 200;
-    transform: translateX(-100%);
-    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
-    box-shadow: var(--shadow-lg);
-    width: 280px !important;
-  }
-
-  .sidebarOpen {
-    transform: translateX(0) !important;
-  }
-}
-
-@media (max-width: 768px) {
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 290px !important;
-    transform: translateX(-100%);
-    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
-    z-index: 200;
-    box-shadow: var(--shadow-lg);
-  }
-
-  .sidebarOpen {
-    transform: translateX(0);
-  }
-
-  .sidebarBackdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(26,21,16,0.4);
-    backdrop-filter: blur(4px);
-    z-index: 199;
-    cursor: pointer;
-  }
-
-  .mobileSidebarClose {
-    display: flex !important;
-  }
-
-  .footer {
-    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
-  }
-}
 .themeToggle {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: var(--border);
   background: var(--cream);
   color: var(--ink-3);
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--transition);
-  flex-shrink: 0;
 }
 .themeToggle:hover {
   background: var(--amber-light);
@@ -467,55 +421,72 @@
   border-color: var(--amber);
 }
 
-.notifBtn {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: var(--border);
-  background: var(--amber-light);
-  color: var(--amber);
-  font-size: 0.82rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--transition);
-}
-.notifBtn:hover { background: var(--amber); color: #fff; }
-.notifOn { font-size: 0.82rem; opacity: 0.6; }
-
-/* Sidebar.module.css */
 .statsBtn {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: var(--border);
   background: var(--cream);
   color: var(--ink-3);
-  font-size: 0.82rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--transition);
 }
 .statsBtn:hover {
   background: var(--sage-light);
   color: var(--sage);
   border-color: var(--sage);
 }
-/* Sidebar.module.css — update footer */
-.footer {
-  padding: 10px 14px;
-  border-top: var(--border);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: auto;
-  flex-wrap: wrap;
+
+.notifBtn {
+  background: var(--amber-light);
+  color: var(--amber);
+}
+.notifBtn:hover { background: var(--amber); color: #fff; }
+
+.notifOn {
+  font-size: 0.82rem;
+  opacity: 0.5;
+  cursor: default;
 }
 
-.footerActions {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin-left: auto;
+/* ── Mobile (single clean media query) ──────────────────────────────── */
+@media (max-width: 768px) {
+  /* Backdrop shows on mobile */
+  .backdrop {
+    display: block;
+  }
+
+  /* Sidebar becomes fixed off-screen drawer */
+  .sidebar {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    height: 100dvh;
+    width: 290px !important;
+    min-width: 290px !important;
+    transform: translateX(-100%);
+    z-index: 200;
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Slide in when open */
+  .sidebarOpen {
+    transform: translateX(0) !important;
+  }
+
+  /* Show X close button */
+  .mobileSidebarClose {
+    display: flex !important;
+  }
+
+  /* Safe area bottom padding */
+  .footer {
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+
+   .projectsSection {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    max-height: 40vh;
+  }
+
+  .addProjectForm {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 }

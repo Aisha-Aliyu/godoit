@@ -41,37 +41,40 @@ export const fetchTasks = async (userId, filters = {}) => {
 };
 
 export const createTask = async (userId, task) => {
-  // Get max position in project
-  const { data: last } = await supabase
+  const { data: maxPos } = await supabase
     .from("tasks")
     .select("position")
     .eq("user_id", userId)
-    .eq("project_id", task.projectId || null)
     .order("position", { ascending: false })
     .limit(1)
     .single();
 
-  const position = (last?.position ?? -1) + 1;
+  const position = (maxPos?.position ?? -1) + 1;
 
   const { data, error } = await supabase
     .from("tasks")
     .insert({
-      user_id:     userId,
-      project_id:  task.projectId || null,
-      title:       task.title.trim(),
-      notes:       task.notes?.trim() || null,
-      priority:    task.priority || "medium",
-      status:      "todo",
-      due_date:    task.dueDate || null,
-      due_time:    task.dueTime || null,
-      is_recurring: task.isRecurring || false,
-      recur_rule:  task.recurRule || null,
+      user_id:    userId,
+      title:      task.title,
+      priority:   task.priority || "medium",
+      status:     "todo",
+      project_id: task.projectId || null,
+      due_date:   task.dueDate   || null,
+      due_time:   task.dueTime   || null,
       position,
     })
-    .select(TASK_SELECT)
+    .select(`
+      *,
+      project:projects(id, name, color, icon),
+      subtasks(*)
+    `)
     .single();
 
-  if (error) return { task: null, error: error.message };
+  if (error) {
+    console.error("❌ createTask error:", error.message, error.details, error.hint);
+    return { task: null, error };
+  }
+
   return { task: data, error: null };
 };
 
@@ -165,7 +168,7 @@ export const fetchProjects = async (userId) => {
 };
 
 export const createProject = async (userId, project) => {
-  const { data: last } = await supabase
+  const { data: maxPos } = await supabase
     .from("projects")
     .select("position")
     .eq("user_id", userId)
@@ -173,15 +176,25 @@ export const createProject = async (userId, project) => {
     .limit(1)
     .single();
 
-  const position = (last?.position ?? -1) + 1;
+  const position = (maxPos?.position ?? -1) + 1;
 
   const { data, error } = await supabase
     .from("projects")
-    .insert({ user_id: userId, name: project.name.trim(), color: project.color, icon: project.icon, position })
+    .insert({
+      user_id:  userId,
+      name:     project.name,
+      color:    project.color || "#c4622d",
+      icon:     project.icon  || "📁",
+      position,
+    })
     .select()
     .single();
 
-  if (error) return { project: null, error: error.message };
+  if (error) {
+    console.error("❌ createProject error:", error.message, error.details, error.hint);
+    return { project: null, error };
+  }
+
   return { project: data, error: null };
 };
 
