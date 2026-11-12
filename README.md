@@ -51,9 +51,9 @@ react-beautiful-dnd is effectively deprecated at this point, and it has known is
 
 When you check off a task, the UI updates immediately and the database write happens in the background. There’s no loading spinner on the checkbox, no waiting for a round trip. If the write fails, it rolls back. This is the right pattern for anything a user does repeatedly, and task completion is the most repeated action in the app.
 
-**Visualizer without AnalyserNode**
+**Ambient sounds generated in the browser**
 
-The ambient audio streams from a CDN with CORS restrictions, which means I can’t attach a Web Audio AnalyserNode to read frequency data. Instead, the visualizer uses a randomized interval that produces bar heights weighted toward the middle of the range. It looks like it’s responding to the music because the timing and distribution feel right, even though it’s not actually connected to the audio signal. Sometimes the right answer is the one that works.
+The five ambient sounds (Gentle Rain, Ocean Waves, Fireplace, Deep Focus and Night Drift) are generated live with the Web Audio API in `lib/ambientEngine.js`: filtered noise with randomly timed drops and crackles, slow swells for the waves, brown noise for focus, and a slowly breathing chord. There are no audio files to download, nothing for the Content Security Policy to block, and no licensing to track. The visualizer is a randomized animation rather than a frequency readout, because steady sounds like rain have an almost flat spectrum and real bars would barely move.
 
 **Supabase RLS everywhere**
 
@@ -81,6 +81,9 @@ src/
 │   ├── usePomodoro.js        Timer phases and Web Audio bell synthesis
 │   ├── useSortableTasks.js   DnD reorder with database sync
 │   └── useTheme.js           Theme toggle with localStorage persistence
+├── lib/
+│   ├── ambientEngine.js       Web Audio generators for the five ambient sounds
+│   └── supabase.js            Supabase client
 └── services/
     ├── authService.js         Supabase Auth wrapper
     ├── notificationService.js Browser notification scheduling
@@ -148,7 +151,7 @@ A **calendar view** that shows task density across a month grid. The heatmap in 
 
 **Offline task creation** using Workbox BackgroundSync. Right now the service worker caches assets but writes still require a connection. The data model is simple enough that offline queueing would be straightforward.
 
-**Custom ambient tracks** uploaded by the user to Supabase Storage. Some people have very specific sounds they focus to and the six built-in options are just a starting point.
+**Custom ambient tracks** uploaded by the user to Supabase Storage. Some people have very specific sounds they focus to and the five built-in sounds are just a starting point.
 
 -----
 
