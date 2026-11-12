@@ -12,6 +12,9 @@ export const TRACKS = [
   { id: "pad",   label: "Night Drift", emoji: "🌙", color: "#4a5a8a", mood: "dreamy" },
 ];
 
+// Older WebKit returns nothing from resume/suspend/close, so never assume a promise
+const quietly = (result) => Promise.resolve(result).catch(() => {});
+
 const AudioCtx =
   typeof window !== "undefined" ? window.AudioContext || window.webkitAudioContext : null;
 
@@ -55,7 +58,7 @@ export const useAmbientMusic = () => {
   useEffect(() => () => {
     clearTimeout(suspendRef.current);
     soundRef.current?.stop(0.05);
-    ctxRef.current?.close().catch(() => {});
+    if (ctxRef.current) quietly(ctxRef.current.close());
   }, []);
 
   // Browsers only let sound start from a tap, so the audio context is created and
@@ -75,7 +78,7 @@ export const useAmbientMusic = () => {
       ctxRef.current = ctx;
       masterRef.current = master;
     }
-    if (ctxRef.current.state !== "running") ctxRef.current.resume().catch(() => {});
+    if (ctxRef.current.state !== "running") quietly(ctxRef.current.resume());
     return ctxRef.current;
   }, []);
 
@@ -105,7 +108,7 @@ export const useAmbientMusic = () => {
     // Let the fade finish, then suspend the context to save battery
     clearTimeout(suspendRef.current);
     suspendRef.current = setTimeout(() => {
-      if (!soundRef.current) ctxRef.current?.suspend().catch(() => {});
+      if (!soundRef.current && ctxRef.current) quietly(ctxRef.current.suspend());
     }, 600);
   }, []);
 

@@ -199,7 +199,7 @@ const BUILDERS = {
 export const SOUND_IDS = Object.keys(BUILDERS);
 
 const FADE_IN = 1.2;
-const LOOKAHEAD = 1.5;
+const LOOKAHEAD = 4;
 
 /**
  * Starts a sound and returns a handle with stop().
@@ -219,8 +219,11 @@ export function startAmbient(ctx, id, destination, { realtime = true } = {}) {
   const voice = build(ctx, out);
   let scheduledUntil = now;
   const scheduleUntil = (until) => {
-    if (voice.schedule && until > scheduledUntil) {
-      voice.schedule(scheduledUntil, until);
+    // If the timer was throttled (a background tab), skip the missed stretch instead
+    // of firing a clump of drops or crackles all at once
+    const from = Math.max(scheduledUntil, ctx.currentTime);
+    if (voice.schedule && until > from) {
+      voice.schedule(from, until);
       scheduledUntil = until;
     }
   };
@@ -236,9 +239,15 @@ export function startAmbient(ctx, id, destination, { realtime = true } = {}) {
     stop(fade = 0.4) {
       clearInterval(timer);
       const t = ctx.currentTime;
-      out.gain.cancelScheduledValues(t);
-      out.gain.setValueAtTime(out.gain.value, t);
-      out.gain.linearRampToValueAtTime(0, t + fade);
+      // Hold the level wherever it is (even mid fade-in) and glide to silence from there.
+      // Safari can report a stale gain.value, so it's only read where cancelAndHold is missing.
+      if (out.gain.cancelAndHoldAtTime) {
+        out.gain.cancelAndHoldAtTime(t);
+      } else {
+        out.gain.cancelScheduledValues(t);
+        out.gain.setValueAtTime(out.gain.value, t);
+      }
+      out.gain.setTargetAtTime(0, t, fade / 4);
       voice.sources.forEach((s) => {
         try { s.stop(t + fade + 0.05); } catch { /* already stopped */ }
       });
