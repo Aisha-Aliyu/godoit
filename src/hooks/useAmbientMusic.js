@@ -1,63 +1,30 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { startAmbient } from "../lib/ambientEngine";
 
+// Every sound is generated in the browser (see lib/ambientEngine.js). The old tracks
+// streamed demo songs from soundhelix.com, which the site's Content Security Policy
+// blocks, so nothing played. Generated sounds have nothing to download or block.
 export const TRACKS = [
-  {
-    id: "lofi",
-    label: "Lo-fi Study",
-    emoji: "🎵",
-    color: "#c4622d",
-    url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-    mood: "focused",
-  },
-  {
-    id: "rain",
-    label: "Gentle Rain",
-    emoji: "🌧",
-    color: "#5b7fa6",
-    url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-    mood: "calm",
-  },
-  {
-    id: "forest",
-    label: "Forest Morning",
-    emoji: "🌿",
-    color: "#4a7c59",
-    url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
-    mood: "peaceful",
-  },
-  {
-    id: "fireplace",
-    label: "Fireplace",
-    emoji: "🔥",
-    color: "#c4922d",
-    url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
-    mood: "cozy",
-  },
-  {
-    id: "deepfocus",
-    label: "Deep Focus",
-    emoji: "🧠",
-    color: "#6b4fa6",
-    url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
-    mood: "intense",
-  },
-  {
-    id: "cafe",
-    label: "Café Noise",
-    emoji: "☕",
-    color: "#8a6245",
-    url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
-    mood: "social",
-  },
+  { id: "rain",  label: "Gentle Rain", emoji: "🌧", color: "#5b7fa6", mood: "calm" },
+  { id: "ocean", label: "Ocean Waves", emoji: "🌊", color: "#3f7f8c", mood: "soothing" },
+  { id: "fire",  label: "Fireplace",   emoji: "🔥", color: "#c4922d", mood: "cozy" },
+  { id: "brown", label: "Deep Focus",  emoji: "🧠", color: "#6b4fa6", mood: "focused" },
+  { id: "pad",   label: "Night Drift", emoji: "🌙", color: "#4a5a8a", mood: "dreamy" },
 ];
+
+const AudioCtx =
+  typeof window !== "undefined" ? window.AudioContext || window.webkitAudioContext : null;
 
 export const useAmbientMusic = () => {
   const [isPlaying,    setIsPlaying]    = useState(false);
   const [currentTrack, setCurrentTrack] = useState(TRACKS[0]);
   const [volume,       setVolume]       = useState(0.4);
-  const [loading,      setLoading]      = useState(false);
   const [visualizer,   setVisualizer]   = useState(Array(12).fill(0.1));
-  const audioRef   = useRef(null);
+  const ctxRef      = useRef(null);
+  const masterRef   = useRef(null);
+  const soundRef    = useRef(null);
+  const volumeRef   = useRef(volume);
+  const suspendRef  = useRef(null);
   const vizTimerRef = useRef(null);
 
   // Animate visualizer bars when playing
@@ -75,59 +42,71 @@ export const useAmbientMusic = () => {
     return () => clearInterval(vizTimerRef.current);
   }, [isPlaying]);
 
-  // Init audio element
-  useEffect(() => {
-    const audio = new Audio();
-    audio.loop = true;
-    audio.volume = volume;
-    audio.preload = "none";
-    audioRef.current = audio;
-
-    audio.addEventListener("canplay", () => setLoading(false));
-    audio.addEventListener("waiting", () => setLoading(true));
-    audio.addEventListener("error", () => setLoading(false));
-
-    return () => {
-      audio.pause();
-      audio.src = "";
-    };
-  }, []);
-
   // Volume sync
   useEffect(() => {
-    if (audioRef.current) audioRef.current.volume = volume;
+    volumeRef.current = volume;
+    const ctx = ctxRef.current;
+    if (ctx && masterRef.current) {
+      masterRef.current.gain.setTargetAtTime(volume, ctx.currentTime, 0.05);
+    }
   }, [volume]);
 
-const play = useCallback(async (track) => {
-  const audio = audioRef.current;
-  if (!audio) return;
+  // Stop everything if the app unmounts
+  useEffect(() => () => {
+    clearTimeout(suspendRef.current);
+    soundRef.current?.stop(0.05);
+    ctxRef.current?.close().catch(() => {});
+  }, []);
 
-  if (track && track.id !== currentTrack.id) {
-    setCurrentTrack(track);
-    setLoading(true);
-    audio.pause();
-    audio.src = track.url;
-    audio.load();          // ← add this for mobile Safari
-    audio.currentTime = 0;
-  } else if (!audio.src || audio.src === window.location.href) {
-    // guard against empty src resolving to page URL
-    audio.src = currentTrack.url;
-    audio.load();
-  }
+  // Browsers only let sound start from a tap, so the audio context is created and
+  // resumed here, inside the play handler, before anything asynchronous happens.
+  const ensureContext = useCallback(() => {
+    if (!AudioCtx) return null;
+    if (!ctxRef.current) {
+      // iPhones mute web audio when the ring switch is on silent unless the page
+      // asks for media playback
+      try {
+        if (navigator.audioSession) navigator.audioSession.type = "playback";
+      } catch { /* not supported */ }
+      const ctx = new AudioCtx();
+      const master = ctx.createGain();
+      master.gain.value = volumeRef.current;
+      master.connect(ctx.destination);
+      ctxRef.current = ctx;
+      masterRef.current = master;
+    }
+    if (ctxRef.current.state !== "running") ctxRef.current.resume().catch(() => {});
+    return ctxRef.current;
+  }, []);
 
-  try {
-    await audio.play();
-    setIsPlaying(true);
-  } catch (e) {
-    console.warn("Playback blocked:", e.message);
-    setIsPlaying(false);
-    setLoading(false);
-  }
-}, [currentTrack]);
+  const play = useCallback((track) => {
+    const ctx = ensureContext();
+    if (!ctx) return;
+    clearTimeout(suspendRef.current);
+
+    const next = track || currentTrack;
+    if (track && track.id !== currentTrack.id) setCurrentTrack(track);
+
+    soundRef.current?.stop();
+    try {
+      soundRef.current = startAmbient(ctx, next.id, masterRef.current);
+      setIsPlaying(true);
+    } catch (e) {
+      console.warn("Ambient sound failed:", e.message);
+      soundRef.current = null;
+      setIsPlaying(false);
+    }
+  }, [currentTrack, ensureContext]);
 
   const pause = useCallback(() => {
-    audioRef.current?.pause();
+    soundRef.current?.stop();
+    soundRef.current = null;
     setIsPlaying(false);
+    // Let the fade finish, then suspend the context to save battery
+    clearTimeout(suspendRef.current);
+    suspendRef.current = setTimeout(() => {
+      if (!soundRef.current) ctxRef.current?.suspend().catch(() => {});
+    }, 600);
   }, []);
 
   const toggle = useCallback(() => {
@@ -137,16 +116,11 @@ const play = useCallback(async (track) => {
 
   const switchTrack = useCallback((track) => {
     if (isPlaying) play(track);
-    else {
-      setCurrentTrack(track);
-      if (audioRef.current) {
-        audioRef.current.src = "";
-      }
-    }
+    else setCurrentTrack(track);
   }, [isPlaying, play]);
 
   return {
     isPlaying, currentTrack, volume, setVolume,
-    loading, visualizer, toggle, switchTrack, play, pause,
+    loading: false, visualizer, toggle, switchTrack, play, pause,
   };
 };
