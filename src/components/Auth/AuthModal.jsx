@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { signIn, signUp, sendMagicLink } from "../../services/authService";
+import { signIn, signUp } from "../../services/authService";
 import styles from "./AuthModal.module.css";
 import clsx from "clsx";
 
+// Magic link sign-in was removed: Supabase's free built-in email only reaches the
+// project's own team, at 2 emails an hour, so visitors never received their link.
 const TABS = [
   { id: "login",  label: "Sign in" },
   { id: "signup", label: "Sign up" },
-  { id: "magic",  label: "✦ Magic link" },
 ];
 
 export default function AuthModal({ isOpen, onClose, onSuccess }) {
@@ -16,32 +17,27 @@ export default function AuthModal({ isOpen, onClose, onSuccess }) {
   const [password, setPassword] = useState("");
   const [loading,  setLoading]  = useState(false);
   const [error,    setError]    = useState("");
-  const [magicSent,setMagicSent]= useState(false);
 
-  const changeTab = (t) => { setTab(t); setError(""); setMagicSent(false); };
+  const changeTab = (t) => { setTab(t); setError(""); };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); setError("");
-
-    if (tab === "magic") {
-      const { error: err } = await sendMagicLink(email);
-      setLoading(false);
-      if (err) { setError(err); return; }
-      setMagicSent(true);
-      return;
-    }
+    setError("");
 
     if (password.length < 8) {
       setError("Password must be at least 8 characters.");
-      setLoading(false); return;
+      return;
     }
 
-    const fn = tab === "signup" ? signUp : signIn;
-    const { user, error: err } = await fn(email, password);
-    setLoading(false);
-    if (err) { setError(err); return; }
-    onSuccess(user);
+    setLoading(true);
+    try {
+      const fn = tab === "signup" ? signUp : signIn;
+      const { user, error: err } = await fn(email, password);
+      if (err) { setError(err); return; }
+      onSuccess(user);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -90,22 +86,6 @@ export default function AuthModal({ isOpen, onClose, onSuccess }) {
           {/* Body */}
           <div className={styles.body}>
             <AnimatePresence mode="wait">
-              {magicSent ? (
-                <motion.div
-                  key="sent"
-                  className={styles.magicSent}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                >
-                  <div className={styles.magicIcon}>📬</div>
-                  <p className={styles.magicTitle}>Check your inbox</p>
-                  <p className={styles.magicSub}>Magic link sent to <strong>{email}</strong></p>
-                  <button className={styles.backLink} onClick={() => setMagicSent(false)}>
-                    Use different email
-                  </button>
-                </motion.div>
-              ) : (
                 <motion.form
                   key={tab}
                   className={styles.form}
@@ -129,26 +109,18 @@ export default function AuthModal({ isOpen, onClose, onSuccess }) {
                     />
                   </div>
 
-                  {tab !== "magic" && (
-                    <div className={styles.field}>
-                      <label className={styles.label}>Password</label>
-                      <input
-                        className={styles.input}
-                        type="password"
-                        placeholder={tab === "signup" ? "Min. 8 characters" : "Your password"}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        autoComplete={tab === "signup" ? "new-password" : "current-password"}
-                        required
-                      />
-                    </div>
-                  )}
-
-                  {tab === "magic" && (
-                    <p className={styles.magicHint}>
-                      We'll send a one-click sign-in link to your email.
-                    </p>
-                  )}
+                  <div className={styles.field}>
+                    <label className={styles.label}>Password</label>
+                    <input
+                      className={styles.input}
+                      type="password"
+                      placeholder={tab === "signup" ? "Min. 8 characters" : "Your password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      autoComplete={tab === "signup" ? "new-password" : "current-password"}
+                      required
+                    />
+                  </div>
 
                   {error && (
                     <motion.p
@@ -165,12 +137,10 @@ export default function AuthModal({ isOpen, onClose, onSuccess }) {
                       <>
                         {tab === "login"  && "Sign In"}
                         {tab === "signup" && "Create Account"}
-                        {tab === "magic"  && "Send Magic Link"}
                       </>
                     )}
                   </button>
                 </motion.form>
-              )}
             </AnimatePresence>
           </div>
 

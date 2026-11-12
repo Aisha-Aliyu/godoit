@@ -30,7 +30,7 @@ A few things I’m particularly happy with:
 |Animations   |Framer Motion                         |
 |Drag and drop|@dnd-kit/core                         |
 |Database     |Supabase (Postgres with RLS)          |
-|Auth         |Supabase Auth (email + magic link)    |
+|Auth         |Supabase Auth (email and password)    |
 |Audio        |Web Audio API + HTML Audio element    |
 |Deployment   |Vercel                                |
 |Fonts        |Lora, Nunito, JetBrains Mono          |
@@ -66,7 +66,7 @@ Every table has row-level security enabled. Users can only read and write their 
 ```
 src/
 ├── components/
-│   ├── Auth/           Sign in modal with email and magic link tabs
+│   ├── Auth/           Sign in and sign up modal (email and password)
 │   ├── BottomNav/      Mobile navigation bar
 │   ├── FocusMode/      Overlay that combines timer and music
 │   ├── MusicPlayer/    Ambient player with animated visualizer
